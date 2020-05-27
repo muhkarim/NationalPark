@@ -4,3 +4,7 @@ ParkyAPI/bin/
 ParkyAPI/obj/
 
 .vs/
+
+Client/bin/
+
+Client/obj/

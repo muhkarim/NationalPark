@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
-using static ParkyAPI.Models.Trail;
 
-namespace ParkyAPI.Models.Dtos
+namespace Client.Models
 {
-    public class TrailDto
+    public class Trail
     {
         public int Id { get; set; }
 
@@ -17,13 +15,14 @@ namespace ParkyAPI.Models.Dtos
 
         [Required]
         public double Distance { get; set; }
+        [Required]
+        public double Elevation { get; set; }
 
+        public enum DifficultyType { Easy, Moderate, Difficult, Expert }
         public DifficultyType Difficulty { get; set; }
         [Required]
         public int NationalParkId { get; set; }
 
-        public NationalParkDto NationalPark { get; set; }
-        [Required]
-        public double Elevation { get; set; }
+        public NationalPark NationalPark { get; set; }
     }
 }
