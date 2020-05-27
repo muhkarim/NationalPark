@@ -5,10 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Client.Models;
 using Client.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Client.Controllers
 {
+    [Authorize]
     public class NationalParksController : Controller
     {
 
@@ -25,10 +28,10 @@ namespace Client.Controllers
 
         public async Task<IActionResult> GetAllNationalPark()
         {
-            return Json(new { data = await _nationalParkRepository.GetAllAsync(SD.NationalParkAPIPath) });
+            return Json(new { data = await _nationalParkRepository.GetAllAsync(SD.NationalParkAPIPath, HttpContext.Session.GetString("JWToken")) });
         }
 
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Upsert(int? id)
         {
             NationalPark obj = new NationalPark();
@@ -39,7 +42,9 @@ namespace Client.Controllers
                 return View(obj);
             }
 
-            obj = await _nationalParkRepository.GetAsync(SD.NationalParkAPIPath, id.GetValueOrDefault());
+
+            // update
+            obj = await _nationalParkRepository.GetAsync(SD.NationalParkAPIPath, id.GetValueOrDefault(),  HttpContext.Session.GetString("JWToken"));
             if(obj == null)
             {
                 return NotFound();
@@ -70,16 +75,16 @@ namespace Client.Controllers
                 }
                 else
                 {
-                    var objFromDb = await _nationalParkRepository.GetAsync(SD.NationalParkAPIPath, obj.Id);
+                    var objFromDb = await _nationalParkRepository.GetAsync(SD.NationalParkAPIPath, obj.Id, HttpContext.Session.GetString("JWToken"));
                     obj.Picture = objFromDb.Picture;
                 }
                 if (obj.Id == 0)
                 {
-                    await _nationalParkRepository.CreateAsync(SD.NationalParkAPIPath, obj);
+                    await _nationalParkRepository.CreateAsync(SD.NationalParkAPIPath, obj, HttpContext.Session.GetString("JWToken"));
                 }
                 else
                 {
-                    await _nationalParkRepository.UpdateAsync(SD.NationalParkAPIPath + obj.Id, obj);
+                    await _nationalParkRepository.UpdateAsync(SD.NationalParkAPIPath + obj.Id, obj, HttpContext.Session.GetString("JWToken"));
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -90,9 +95,10 @@ namespace Client.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var status = await _nationalParkRepository.DeleteAsync(SD.NationalParkAPIPath, id);
+            var status = await _nationalParkRepository.DeleteAsync(SD.NationalParkAPIPath, id, HttpContext.Session.GetString("JWToken"));
             if (status)
             {
                 return Json(new { success = true, message = "Delete Successful" });
